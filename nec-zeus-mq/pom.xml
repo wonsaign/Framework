@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.nec.zeusas</groupId>
+		<artifactId>zeus-framework</artifactId>
+		<version>1.0.0</version>
+	</parent>
+	<artifactId>nec-zeus-mq</artifactId>
+	<name>nec-zeus-mq</name>
+	<packaging>jar</packaging>
+	<url>http://www.zeusas.com/</url>
+	<description>
+		zeusas框架核心包。
+	</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+
+		<amqp-client.version>4.2.2</amqp-client.version>
+		<spring-rabbit.version>1.7.5.RELEASE</spring-rabbit.version>
+	</properties>
+
+	<dependencies>
+		<!-- rabbitmq依赖 -->
+		<dependency>
+			<groupId>com.rabbitmq</groupId>
+			<artifactId>amqp-client</artifactId>
+			<version>${amqp-client.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.amqp</groupId>
+			<artifactId>spring-rabbit</artifactId>
+			<version>${spring-rabbit.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.nec.zeusas</groupId>
+			<artifactId>nec-zeus-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>logback.xml</exclude>
+					<exclude>config.properties</exclude>
+					<exclude>jdbc.properties</exclude>
+				</excludes>
+			</resource>
+		</resources>
+	</build>
+</project>

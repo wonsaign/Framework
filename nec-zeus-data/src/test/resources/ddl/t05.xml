@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- org_sync_ddl.xml -->
+<Tables>
+	<DDL id="ERP_SYNC">
+		<!-- type=jdbc, datasource, jndi -->
+		<datasource type="datasource">
+			k3
+		</datasource>
+		<table id="BIN_INVENTORY">
+			<c>##金蝶库存获脚本</c>
+			<type>query</type>
+			<key>ProductId</key>
+			<name></name>
+			<stmt>
+				<![CDATA[
+				SELECT FItemId as ProductId, 
+					i.fstockid as stockId,
+					convert(int,FQty) as qty 
+				FROM  
+					[AIS20130314203706].[dbo].ICInventory i 
+				WHERE fstockId in (
+					'10616',
+					'10618',
+					'10619',
+					'10620',
+					'10621',
+					'10119',
+					'10282',
+					'10283',
+					'10285',
+					'10286',
+					'23233',
+					'23234',
+					'23235',
+					'23236',
+					'23237',
+					'23238',
+					'23247',
+					'23248',
+					'23249',
+					'23239',
+					'23240',
+					'23241',
+					'23244',
+					'23245',
+					'23246',
+					'23250',
+					'23251',
+					'23252');
+				]]>
+			</stmt>
+		</table>
+		<table id="BIN_STATUS">
+			<c>金蝶库存变化监视脚本</c>
+			<type>query</type>
+			<key></key>
+			<name></name>
+			<stmt>
+		<![CDATA[
+			SELECT top 1 
+				last_user_update
+			FROM    
+				sys.dm_db_index_usage_stats 
+			WHERE    
+				database_id = DB_ID('AIS20130314203706') 
+				AND last_user_update IS NOT NULL
+				AND object_id=object_id('[AIS20130314203706].[dbo].[ICInventory]')
+		]]>
+			</stmt>
+		</table>
+
+		<table id="BIN_ERPORDER">
+			<c>金蝶未审核单据监视脚本</c>
+			<type>query</type>
+			<key></key>
+			<name></name>
+			<stmt>
+				<![CDATA[
+		SELECT d.fitemid as ProductId,
+			d.FSCStockID as stockId ,
+			convert(int,SUM(d.FAuxQty)) as qty
+		FROM [AIS20130314203706].[dbo].[ICStockBill] h 
+			JOIN [AIS20130314203706].[dbo].[ICStockBillEntry] d on h.FInterID = d.FInterID
+			JOIN [AIS20130314203706].[dbo].[t_ICItem] i on d.FItemID = i.FItemID
+			JOIN [AIS20130314203706].[dbo].[t_Stock] s on s.FItemID = d.FSCStockID
+		WHERE h.frob=1 and h.fstatus=0 
+			and h.FCancellation=0
+			and i.f_112 is not null
+			and h.FTranType =41
+			and s.fnumber in ('3.01','3.03','3.05','4.01','4.03','4.04','4.05','4.06','5.01','5.03','5.05','6.01','6.03','6.05','2.01','2.03','2.05','9.01','9.03','9.05','7.01','7.03','7.05','8.01','8.03','8.05')
+		GROUP by i.fnumber ,i.f_112,d.fitemid,d.FSCStockID
+		UNION ALL
+		SELECT d.fitemid as ProductId,
+			d.FDCStockID as stockId,
+			convert(int,SUM(d.FAuxQty)) as qty
+		FROM [AIS20130314203706].[dbo].[ICStockBill] h 
+		JOIN [AIS20130314203706].[dbo].[ICStockBillEntry] d on h.FInterID = d.FInterID
+		JOIN [AIS20130314203706].[dbo].[t_ICItem] i on d.FItemID = i.FItemID
+		JOIN [AIS20130314203706].[dbo].[t_Stock] s on s.FItemID = d.FDCStockID
+		WHERE h.frob=1 and h.fstatus=0 and h.FCancellation=0
+			and i.f_112 is not null
+			and h.FTranType =21
+			and s.fnumber in ('3.01','3.03','3.05','4.01','4.03','4.04','4.05','4.06','5.01','5.03','5.05','6.01','6.03','6.05','2.01','2.03','2.05','9.01','9.03','9.05','7.01','7.03','7.05','8.01','8.03','8.05')
+		GROUP BY i.fnumber ,i.f_112,i.fname,h.fstatus,d.fitemid,d.FDCStockID
+				]]>
+			</stmt>
+		</table>
+	</DDL>
+
+	<DDL id="WMS_SYNC">
+		<table id="BIN_WMSORDER">
+			<c>##订单锁库存获脚本</c>
+			<type>query</type>
+			<key></key>
+			<name></name>
+			<stmt>
+				<![CDATA[
+			SELECT b.productid,
+				counter.Warehouse AS stockId,
+				sum(b.quantity) as qty 
+			FROM bus_order a
+				JOIN bus_orderdetail b ON a.orderno = b.orderno
+				JOIN base_counter counter on counter.CounterID=a.CounterId
+			WHERE a.orderstatus in ('1','2','3','4','5','10')
+			AND  ifnull(b.detailType,0)=0
+			GROUP BY b.productid,counter.Warehouse
+				]]>
+			</stmt>
+		</table>
+		
+		<table id="BIN_WMSCART">
+			<c>##购物车锁库存获脚本</c>
+			<type>query</type>
+			<key>cartDetailDescs</key>
+			<name></name>
+			<property>stockId,quantity,cartDetailDescs</property>
+			<stmt>
+				<![CDATA[
+		SELECT counter.Warehouse AS stockId,
+			detail.quantity,
+			detail.cartDetailDescs
+		FROM bus_cartdetail detail
+		INNER JOIN bus_cart cart ON detail.cartid = cart.CartId
+		INNER JOIN base_counter counter ON counter.CounterID = cart.CounterId
+		WHERE cart. STATUS = 2 
+		AND (?-cart.lastupdate<?)
+				]]>
+			</stmt>
+		</table>	
+
+		<!-- 获取定单最新生成的时间 -->
+		<table id="BIN_ORDERSTATUS">
+			<c>直发系统单据变化按钮</c>
+			<type>query</type>
+			<key></key>
+			<name></name>
+			<stmt>
+				<![CDATA[
+					SELECT lastUpdate
+					FROM core_idgen 
+					WHERE sequenceid='ORDERID'
+				]]>
+			</stmt>
+		</table>
+	</DDL>
+</Tables>

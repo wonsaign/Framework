@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tables>
+
+<DDL id="DEMO">
+<table id="DEMO">
+	<datasource type="jdbc">
+		dataSource
+	</datasource>
+<c>##金蝶销售记录</c>
+<stmt>
+<![CDATA[
+SELECT distinct [CounterCode]
+      ,pd.[Unitcode]
+      ,sum([Amount]) as amount
+FROM [BI_LS_New].[dbo].[BI_Transactionlog_NS] tn
+inner join [ERP_WITPOS].[dbo].[I_ERP_Products] pd on pd.Unitcode = tn.Unitcode
+where TXD_Date >= @begindate and TXD_Date <= @enddate
+and [Brand] = N'ZW' and [Manufacturers] <> N'LS露芯'
+and [K3ProductCode] not like N'C%'
+and [Status] = N'B'		
+and CounterCode not in (SELECT distinct [CounterCode]
+	FROM [ERP_WITPOS].[dbo].[CounterInfo_Canceled]
+	where [IsCanceled] = 1)
+and CounterCode not like N'00000%'
+group by [CounterCode],pd.[Unitcode]
+order by [CounterCode],amount desc
+]]>
+</stmt>
+</table>
+
+<proc id="DUMPOUTORDER">
+<!-- update, query -->
+<type>update</type>
+<stmt>
+	
+</stmt>
+</proc>
+
+</DDL>
+
+</Tables>
+	

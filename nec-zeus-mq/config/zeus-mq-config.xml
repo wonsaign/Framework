@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mq-config>
+	<mq id="demo">
+		<pattern>test.aaa</pattern>
+		<queue>AAA</queue>
+		<exchanger>exchanger</exchanger>
+		<routeKey>test.aaa</routeKey>
+		<!-- 消费类 -->
+		<consumer>com.nec.zeusas.mq.demo.DemoConsumer</consumer>
+		<!-- 消息队列对应的MB -->
+		<entityClass>com.nec.zeusas.mq.demo.bean.MyBean</entityClass>
+		<!-- 是否是启动监听服务 -->
+		<listener>false</listener>
+	</mq>
+</mq-config>
+

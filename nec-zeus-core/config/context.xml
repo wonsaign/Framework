@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context>
+		<Resource name="jdbc/dataSource" 
+			auth="Container"
+			type="javax.sql.DataSource" 
+			username="root"
+			password="admin"
+			url="jdbc:mysql://192.168.20.162:3306/dp_order_beta" 
+			driverClassName="com.mysql.jdbc.Driver"
+			initialSize="2" 
+			maxWait="5000" 
+			maxIdle="2"
+			minIdle="2"
+			validationQuery="select 1" 
+			poolPreparedStatements="true" />
+</Context>

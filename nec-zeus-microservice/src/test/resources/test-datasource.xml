@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+	<!-- oracle.driver = oracle.jdbc.driver.OracleDriver -->
+	<!-- oracle.url = jdbc:oracle:thin:@127.0.0.1:1521:ORCL -->
+	<!-- oracle.username = PREM -->
+	<!-- oracle.password = 123456 -->
+	<!-- dbcp2.maxIdle = 10 -->
+	<!-- dbcp2.minIdle = 5 -->
+	<!-- dbcp2.initialSize = 20 -->
+	<!-- dbcp2.timeBetweenEvictionRunsMillis = 60000 -->
+	<!-- dbcp2.poolPreparedStatements = true -->
+	<!-- dbcp2.maxOpenPreparedStatements = 50 -->
+	<!-- dbcp2.removeAbandonedTimeout = 180 -->
+	<!-- dbcp2.testWhileIdle = true -->
+	<!-- dbcp2.testOnBorrow = false -->
+	<!-- dbcp2.testOnReturn = false -->
+	<!-- dbcp2.validationQuery = SELECT 1 FROM DUAL -->
+
+	<bean id="BasicDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<!-- 数据库基本信息配置 -->
+		<property name="url" value="${oracle.url}" />
+		<property name="driverClassName" value="${oracle.driver}" />
+		<property name="username" value="${oracle.username}" />
+		<property name="password" value="${oracle.password}" />
+
+		<property name="maxIdle" value="${dbcp2.maxIdle}" />
+		<property name="minIdle" value="${dbcp2.minIdle}" />
+		<property name="initialSize" value="${dbcp2.initialSize}" />
+		<property name="timeBetweenEvictionRunsMillis" value="${dbcp2.timeBetweenEvictionRunsMillis}" />
+
+		<property name="poolPreparedStatements" value="${dbcp2.poolPreparedStatements}" />
+		<property name="maxOpenPreparedStatements" value="${dbcp2.maxOpenPreparedStatements}" />
+		<property name="removeAbandonedTimeout" value="${dbcp2.removeAbandonedTimeout}" />
+
+		<!-- 申请连接时执行validationQuery检测连接是否有效，配置为true会降低性能 -->
+		<property name="testOnBorrow" value="${dbcp2.testOnBorrow}" />
+
+		<!-- 归还连接时执行validationQuery检测连接是否有效，配置为true会降低性能 -->
+		<property name="testOnReturn" value="${dbcp2.testOnReturn}" />
+
+		<!-- 建议配置为true，不影响性能，并且保证安全性。申请连接的时候检测，如果空闲时间大于 timeBetweenEvictionRunsMillis，执行validationQuery检测连接是否有效。 -->
+		<property name="testWhileIdle" value="${dbcp2.testWhileIdle}" />
+
+		<!-- 用来检测连接是否有效的sql，要求是一个查询语句,如果validationQuery为 null，testOnBorrow、testOnReturn、testWhileIdle都不起其作用。 -->
+		<property name="validationQuery" value="${dbcp2.validationQuery}" />
+	</bean>
+</beans>

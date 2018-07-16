@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- sync_cancelorders_task.xml -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="pingTask" class="com.nec.zeusas.common.task.PingTask">
+	</bean>
+	
+	<bean id="tb_PingTask" class="com.nec.zeusas.common.task.TaskBean">
+		<property name="cronTask" ref="pingTask" />
+		<property name="waitTime" value="300000" />
+		<property name="valid" value="false" />
+		<property name="cronExpresion">
+			<list>
+				<!--   s m h d w m q y C  （36小时执行一次）-->
+				<value>5 * * * * * * * 1</value>
+			</list>
+		</property>
+	</bean>
+</beans>

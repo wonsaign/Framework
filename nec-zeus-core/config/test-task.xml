@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/mvc
+           http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:config.properties</value>
+				<value>classpath:jdbc.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="appContext" class="com.nec.zeusas.core.utils.AppContext"></bean>
+
+	<import resource="classpath:core/core-event.xml" />
+	<import resource="classpath:core/core-hibernate.xml" />
+	<import resource="classpath:core/core-rawdata.xml" /> 
+	<import resource="classpath:core-schedule.xml" />
+	<import resource="classpath:core/core-service.xml" />
+	<import resource="classpath:core/core-jdbc.xml"/>
+
+	<context:component-scan base-package="com.nec.zeusas" />
+	
+	<bean id="pingTask" class="com.nec.zeusas.common.task.PingTask">
+		<property name="name" value="PingTask..."></property>
+	</bean>
+	
+	<bean id="t1" class="com.nec.zeusas.common.task.TaskBean">
+		<property name="cronTask" ref="pingTask" />
+		<property name="waitTime" value="1000" />
+		<property name="valid" value="false" />
+		<property name="cronExpresion">
+			<list>
+				<!--   s m  h d w m q  y C  -->
+				<value>5 0  0 0 0 0 0  0 1</value>
+				<value>0 58 18 * * * * * 0</value>
+			</list>
+		</property>
+	</bean>
+	<import resource="classpath:core-schedule.xml"/>
+</beans>

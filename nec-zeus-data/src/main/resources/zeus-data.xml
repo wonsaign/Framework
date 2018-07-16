@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 自数据定义处理服务模块 -->
+<!-- 实现自定义服务需要在config.properties文件 -->
+<!-- 中定义: -->
+<!-- DDL=ddl_xxx.xml -->
+<!-- 再从spring import core-rawdata.xml定义即可。 -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="DBMS" class="com.nec.zeusas.data.DBMS">
+	</bean>
+
+</beans>

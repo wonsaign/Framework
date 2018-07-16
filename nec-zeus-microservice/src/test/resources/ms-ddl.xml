@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Tables>
+	<DDL id="ORDM_SELLER">
+		<datasource type="datasource">k3DataSource</datasource>
+		<table id="ORDM_SELLER">
+			<c>##金蝶销售记录</c>
+			<key>cid</key>
+			<name></name>
+			<stmt>
+<![CDATA[
+XX
+]]>
+			</stmt>
+		</table>
+
+		<proc id="ORDM_DEMO">
+			<!-- update, query -->
+			<type>update</type>
+			<stmt>
+				INSERT INTO tb_productseller(cid,pid,val) VALUES (?,?,?)
+			</stmt>
+		</proc>
+	</DDL>
+</Tables>

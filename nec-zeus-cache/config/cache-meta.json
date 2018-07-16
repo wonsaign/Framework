@@ -1,0 +1,3 @@
+[
+{"entityClass":"bean.Student","id":"bean.Student","description":"学生类的数据存放到DB1","lockMaxTime":3},
+]

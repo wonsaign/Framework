@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cache-meta>
+	<!-- if id is NULL, setting entityClass name as default -->
+	<meta id="">
+		<description></description>
+		<entityClass>bean.Student</entityClass>
+		<keyClass></keyClass>
+		<!-- UNIT: s -->
+		<lockMaxTime>3</lockMaxTime>
+	</meta>
+	<meta id="AA">
+		<description></description>
+		<entityClass>java.lang.Long</entityClass>
+		<keyClass>bean.Student</keyClass>
+		<!-- UNIT: s -->
+		<lockMaxTime>3</lockMaxTime>
+	</meta>
+</cache-meta>
+

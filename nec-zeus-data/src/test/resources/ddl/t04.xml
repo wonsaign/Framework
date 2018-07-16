@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tables>
+	<DDL id="K3_CUSTOMERS">
+	<datasource type="datasource">
+		k3
+	</datasource>
+		<table id="K3_CUSTOMER">
+			<c>##金蝶客户</c>
+			<type>query</type>
+			<key>customerid</key>
+			<name></name>
+			<stmt>
+				<![CDATA[
+					SELECT a.FItemID AS customerid,
+						a.FparentID AS parentid,
+						a.fname AS customername,
+						a.FMobilePhone AS Mobile,
+						a.FPhone AS Phone,
+						a.FContact AS Contact,
+						ogt.FItemID AS CustomerTypeID,
+						ogt.FName AS CustomerType,
+						b.FName AS Province,
+						c.FName AS City,
+						a.F_106 AS AreaCounty,
+						a.FAddress AS Address,
+						FPostalCode AS PostCode,
+						s.FDeleted AS Status,
+						s.fnumber AS CustomerCode,
+						s.FLevel as level
+						FROM [AIS20130314203706].[dbo].[t_Organization] a 
+						JOIN [AIS20130314203706].[dbo].[CRM_Province] b ON a.FProvinceID = b.FID 
+						JOIN [AIS20130314203706].[dbo].[CRM_City] c ON a.FCityID = c.FID 
+						JOIN [AIS20130314203706].[dbo].[t_Item_3017] ogt ON a.F_107 = ogt.FItemID
+						JOIN [AIS20130314203706].[dbo].[t_Item] s ON a.FItemID=s.FItemID
+						WHERE s.FDeleted = 0
+						AND a.FName not LIKE '%撤%' 
+						AND a.FName not LIKE '%保证金%' 
+						AND s.fnumber not LIKE '*%'
+						AND s.fnumber not LIKE 'Z%'
+						ORDER BY b.FName
+				]]>
+			</stmt>
+		</table>
+		
+		<table id="K3_ORGCUSTOMER">
+			<c>##金蝶客户</c>
+			<type>query</type>
+			<key>customerid</key>
+			<name></name>
+			<stmt>
+				<![CDATA[
+					 SELECT i.FItemID AS customerid,
+ 							i.FParentID AS parentid,
+ 							i.FName AS customername,
+ 							i.FDeleted AS Status,
+							i.Fnumber AS CustomerCode,
+							i.FLevel AS level
+ 						FROM [AIS20130314203706].[dbo].[t_Item] i
+ 						WHERE i.FItemClassID=1 
+ 						and i.FName not like'%撤%'
+ 						AND i.fnumber not LIKE '*%'
+						AND i.fnumber not LIKE 'Z%' 
+						and i.FItemID not in( SELECT FItemID FROM [AIS20130314203706].[dbo].[t_Organization])
+				]]>
+			</stmt>
+		</table>
+	</DDL>
+	
+	<DDL id="ORDM_CUSTOMERS">
+	<datasource type="datasource">
+		dataSource
+	</datasource>
+
+	<table id="ALL_CUSTOMER">
+			<c>##开发库客户</c>
+			<type>query</type>
+			<key></key>
+			<name></name>
+			<stmt>
+				<![CDATA[
+					SELECT customerid,
+						parentid,
+						customername,
+						Mobile,
+						Phone,
+						Contact,
+						CustomerTypeID,
+						CustomerType,
+						Province,
+						City,
+						AreaCounty,
+						Address,
+						PostCode,
+						Status,
+						lastUpdate
+						FROM base_customer
+				]]>
+			</stmt>
+		</table>
+	
+	<proc id="INSERT_CUSTOMER">
+			<!-- update, query -->
+			<type>update</type>
+			<stmt>
+				<![CDATA[
+				INSERT INTO base_customer (
+					CustomerID,
+					ParentID,
+					CustomerName,
+					Mobile,
+					Phone,
+					Contact,
+					CustomerTypeID,
+					CustomerType,
+					Province,
+					City,
+					AreaCounty,
+					Address,
+					PostCode,
+					Status,
+					lastUpdate,
+					CustomerCode,
+					level)
+				VALUES
+					(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+				]]>
+			</stmt>
+		</proc>
+		
+		<proc id="INSERT_ORGCUSTOMER">
+			<!-- update, query -->
+			<type>update</type>
+			<stmt>
+				<![CDATA[
+				INSERT INTO base_customer (
+					CustomerID,
+					ParentID,
+					CustomerName,
+					CustomerTypeID,
+					CustomerType,
+					Status,
+					lastUpdate,
+					CustomerCode,
+					level)
+				VALUES
+					(?,?,?,?,?,?,?,?,?);
+				]]>
+			</stmt>
+		</proc>
+	
+	<proc id="UPDATE_CUSTOMER">
+			<!-- update, query -->
+			<type>update</type>
+			<stmt>
+				<![CDATA[
+				UPDATE base_customer 
+					SET ParentID=?,
+					  	CustomerName=?,
+					   	Mobile=?,
+					    Phone=?,
+					    Contact=?,
+					    CustomerTypeID=?,
+					    CustomerType=?,
+					    Province=?,
+					    City=?, 
+					    AreaCounty=?,
+					    Address=?,
+					    PostCode=?,
+					    Status=?,
+					    lastUpdate=?,
+					    CustomerCode =?,
+					    level=?
+					WHERE (CustomerID=?)
+				]]>
+			</stmt>
+		</proc>
+		
+	<proc id="UPDATE_ORGCUSTOMER">
+			<!-- update, query -->
+			<type>update</type>
+			<stmt>
+				<![CDATA[
+				UPDATE base_customer 
+					SET ParentID=?,
+					  	CustomerName=?,
+					    CustomerTypeID=?,
+					    CustomerType=?,
+					    Status=?,
+					    lastUpdate=?,
+					    CustomerCode =?,
+					    level=? 
+				    WHERE (CustomerID=?)
+				]]>
+			</stmt>
+		</proc>
+	
+	<proc id="DISABLE_CUSTOMER">
+			<!-- update, query -->
+			<type>update</type>
+			<stmt>
+				<![CDATA[
+				UPDATE base_customer 
+					SET Status=?,
+					    lastUpdate=? WHERE (CustomerID=?)
+				]]>
+			</stmt>
+		</proc>
+	
+	</DDL>
+</Tables>
+
+
+	

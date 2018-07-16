@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tables>
+	<DDL id="K3_COUNTERS">
+	<datasource type="datasource">
+		k3
+	</datasource>
+		<table id="K3_COUNTER">
+			<c>##金蝶柜台</c>
+			<type>query</type>
+			<key>CounterID</key>
+			<name></name>
+			<property>counterId,counterCode,counterName,customerId,contact
+						,mobile,phone,country,province,city,areaCounty
+						,areaprice,address,shippingAddress,postCode,channel
+						,type,status,lastUpdate,CounterType,newCounter,area</property>
+			<stmt>
+				<![CDATA[
+					SELECT t3008.FItemID as CounterID
+						,t3008.F_110 AS CounterCode
+						,t3008.FName AS CounterName
+						,F_109 AS customerId
+						,F_115 AS Contact
+						,F_117 AS Mobile
+						,F_116 AS Phone
+						,N'中国' AS Country
+						,p.FName AS Province
+						,c.fName AS City
+						,F_120 AS AreaCounty
+						,F_106 AS AreaPrice
+						,F_118 AS Address
+						,F_118 AS Shipping_Address
+						,F_119 AS PostCode
+						,F_105 AS Channel
+						,t3007.FName AS Type
+						,s.FDeleted AS Status
+						,cast(getdate() AS bigint) AS lastUpdate
+						,t3008.FNumber as CounterType
+						,F_129 AS newCounter
+						,F_128 AS area
+						FROM [AIS20130314203706].[dbo].[t_Item_3008] t3008
+						JOIN [AIS20130314203706].[dbo].[t_Item] t3007 ON t3008.F_101 = t3007.FItemID
+						JOIN [AIS20130314203706].[dbo].[t_Item] s ON t3008.FItemID=s.FItemID
+						JOIN [AIS20130314203706].[dbo].[t_Item] p ON t3008.F_103 = p.FItemID and p.FItemClassID='3009'
+						JOIN [AIS20130314203706].[dbo].[t_Item] c ON t3008.F_104 = c.FItemID and c.FItemClassID='3010'
+						WHERE s.FDeleted=0
+						AND t3008.FName not LIKE '%撤%'
+						AND F_109 <>0
+						ORDER BY p.FName
+				]]>
+			</stmt>
+		</table>
+	</DDL>
+	
+	<DDL id="ORDM_COUNTERS">
+	<datasource type="datasource">
+		dataSource
+	</datasource>
+	<table id="ALL_COUNTER">
+			<c>##开发库柜台</c>
+			<type>query</type>
+			<key></key>
+			<name></name>
+			<stmt>
+<![CDATA[
+	SELECT CounterID
+		, CounterCode
+		, CounterName
+		, customerid
+		, Contact
+		, Mobile
+		, Phone
+		, Country
+		, Province
+		, City
+		, AreaCounty
+		, AreaPrice
+		, Address
+		, Shipping_Address
+		, PostCode
+		, Channel
+		, Type
+		, Status
+		, lastUpdate
+		, Warehouse
+		FROM base_counter
+]]>
+			</stmt>
+		</table>
+
+	<proc id="INSERT_COUNTER">
+			<!-- update, query -->
+			<type>update</type>
+			<stmt>
+<![CDATA[
+	INSERT INTO base_counter 
+		(CounterID, CounterCode, CounterName, CustomerId, Owner, Contact, Mobile, Phone, Country, Province, City, AreaCounty, AreaPrice, Address, Shipping_Address, PostCode, Channel, Type, Status, LastUpdate,Warehouse,CounterType,newCounter,Area)
+	VALUES  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+]]>
+			</stmt>
+		</proc>
+		
+	<proc id="UPDATE_COUNTER">
+			<!-- update, query -->
+			<type>update</type>
+			<stmt>
+				<![CDATA[
+				UPDATE base_counter 
+					SET CounterCode=?, 
+						CounterName=?, 
+						CustomerId=?, 
+						Contact=?, 
+						Mobile=?, 
+						Phone=?, 
+						Country=?, 
+						Province=?, 
+						City=?, 
+						AreaCounty=?, 
+						AreaPrice=?,
+						Address=?,
+						PostCode=?, 
+						Channel=?, 
+						Type=?, 
+						Status=?, 
+						LastUpdate=?,
+						CounterType=?,
+						newCounter=?,
+						Area=?
+						WHERE (CounterID=?)
+				]]>
+			</stmt>
+		</proc>
+	
+	<proc id="DISABLE_COUNTER">
+			<!-- update, query -->
+			<type>update</type>
+			<stmt>
+				<![CDATA[
+				UPDATE base_counter 
+					SET Status=?, 
+						LastUpdate=?
+						WHERE (CounterID=?)
+				]]>
+			</stmt>
+		</proc>
+	
+	</DDL>
+</Tables>
+
+
+	

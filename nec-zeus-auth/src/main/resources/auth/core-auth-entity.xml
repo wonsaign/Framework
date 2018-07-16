@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+	<!-- 用户认证数据存取类 -->
+	<bean id="authUserDao" class="com.nec.zeusas.security.auth.dao.impl.AuthUserDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- 组织机构Group数据存取定义 -->
+	<bean id="groupDao" class="com.nec.zeusas.security.auth.dao.impl.GroupDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 组织机构 -->
+	<bean id="orgUnitDao" class="com.nec.zeusas.security.auth.dao.impl.OrgUnitDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- shiro权限存取定义 -->
+	<bean id="permissionInfoDao" class="com.nec.zeusas.security.auth.dao.impl.PermissionInfoDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 角色存取类 -->
+	<bean id="roleDao" class="com.nec.zeusas.security.auth.dao.impl.RoleDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- Auth Service -->
+	<bean id="authCenterManager" class="com.nec.zeusas.security.auth.service.impl.AuthCenterManagerImpl">
+		<property name="groupService" ref="groupService" />
+		<property name="roleService" ref="roleService" />
+		<property name="orgUnitService" ref="orgUnitService" />
+		<property name="authUserService" ref="authUserService" />
+		<property name="permissionInfoService" ref="permissionInfoService" />
+	</bean>
+	
+	<bean id="authUserService" class="com.nec.zeusas.security.auth.service.impl.AuthUserServiceImpl">
+		<property name="dao" ref="authUserDao" />
+		<property name="idGenService" ref="idGenService" />
+	</bean>
+
+	<bean id="groupService" class="com.nec.zeusas.security.auth.service.impl.GroupServiceImpl">
+		<property name="dao" ref="groupDao" />
+	</bean>
+	
+	<bean id="orgUnitService" class="com.nec.zeusas.security.auth.service.impl.OrgUnitServiceImpl">
+		<property name="dao" ref="orgUnitDao" />
+	</bean>
+	
+	<bean id="permissionInfoService" class="com.nec.zeusas.security.auth.service.impl.PermissionInfoServiceImpl">
+		<property name="dao" ref="permissionInfoDao" />
+	</bean>
+	
+	<bean id="roleService" class="com.nec.zeusas.security.auth.service.impl.RoleServiceImpl">
+		<property name="dao" ref="roleDao" />
+	</bean>
+</beans>

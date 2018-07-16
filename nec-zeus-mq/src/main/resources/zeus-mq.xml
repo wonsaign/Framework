@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  
+     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd  
+     http://www.springframework.org/schema/rabbit  
+     http://www.springframework.org/schema/rabbit/spring-rabbit-1.2.xsd">
+
+	<!--配置connection-factory，指定连接rabbit server参数 -->
+	<rabbit:connection-factory id="connectionFactory"
+		publisher-confirms="true" 
+		username="${rabbit.username}" 
+		password="${rabbit.password}"
+		host="${rabbit.host}" 
+		port="${rabbit.port}" />
+
+	<!--通过指定下面的admin信息，当前producer中的exchange和queue会在rabbitmq服务器上自动生成 -->
+	<rabbit:admin id="connectAdmin" connection-factory="connectionFactory" />
+
+	<!--定义rabbit template用于数据的接收和发送 -->
+	<rabbit:template id="amqpTemplate" 
+	connection-factory="connectionFactory"
+		confirm-callback="confirmCallBackListener" 
+		return-callback="returnCallBackListener"
+		channel-transacted="false" 
+		exchange="${rabbit.exchanger}" 
+		mandatory="true" />
+
+	<bean id="mqConfigManager" class="com.nec.zeusas.mq.service.MQConfigManager"
+		init-method="load">
+		<property name="config" value="${mq.config}"></property>
+	</bean>
+
+	<bean id="messageSender" class="com.nec.zeusas.mq.util.MessageSender">
+		<property name="amqpTemplate" ref="amqpTemplate"></property>
+		<property name="mqConfigManager" ref="mqConfigManager"></property>
+	</bean>
+
+	<bean id="confirmCallBackListener" class="com.nec.zeusas.mq.service.ConfirmCallBackListener"></bean>
+	<bean id="returnCallBackListener" class="com.nec.zeusas.mq.service.ReturnCallBackListener"></bean>
+</beans>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd  
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+	<!-- 需要一个外部的Redis定义文件导入。包括下述变量的配置项： -->
+
+	<!-- #redis的服务器地址 -->
+	<!-- redis.host=192.168.0.126 -->
+	<!-- #redis的服务端口 -->
+	<!-- redis.port=6379 -->
+	<!-- #密码 -->
+	<!-- redis.password= -->
+	<!-- #链接数据库 -->
+	<!-- redis.default.db=0 -->
+	<!-- #客户端超时时间单位是毫秒 -->
+	<!-- redis.timeout=100000 -->
+	<!-- #最大连接数 -->
+	<!-- redis.maxActive=300 -->
+	<!-- #最大空闲数 -->
+	<!-- redis.maxIdle=100 -->
+	<!-- #最大建立连接等待时间 -->
+	<!-- redis.maxWaitMillis=1000 -->
+	<!-- Meta管理定义 -->
+	<!-- redis.config=config/cache-meta.json -->
+
+	<!-- Redis 配置 -->
+	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxTotal" value="${redis.maxActive}" />
+		<property name="maxIdle" value="${redis.maxIdle}" />
+		<property name="maxWaitMillis" value="${redis.maxWaitMillis}" />
+		<property name="testOnBorrow" value="true" />
+	</bean>
+
+	<bean id="jedisPool" class="redis.clients.jedis.JedisPool">
+		<constructor-arg name="poolConfig" ref="jedisPoolConfig" />
+		<constructor-arg name="host" value="${redis.host}" />
+		<constructor-arg name="port" value="${redis.port}" />
+		<!-- <constructor-arg name="timeout" value="${redis.timeout}" /> -->
+		<!-- <constructor-arg name="password" value="${redis.password}" /> -->
+		<!-- <constructor-arg name="database" value="0" /> -->
+	</bean>
+
+	<bean id="cacheMetaManager" class="com.nec.zeusas.cache.meta.CacheMetaManager" 
+		init-method="init">
+		<property name="pool" ref="jedisPool"></property>
+		<property name="configFile" value="${redis.config}" />
+	</bean>
+
+	<bean id="redisService" class="com.nec.zeusas.cache.service.impl.RedisServiceImpl">
+		<property name="cacheMetaManager" ref="cacheMetaManager"></property>
+	</bean>
+</beans>

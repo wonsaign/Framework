@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Tables>
+	<DDL id="K3_BALANCE_SYNC">
+		<datasource type="datasource">
+			k3
+		</datasource>
+
+		<table id="K3_RECEIVE_ORDER">
+			<c>#同步K3收款单#</c>
+			<name>K3_RECEIVE_ORDER</name>
+			<key>FID</key>
+			<property>
+			<![CDATA[ 
+				fId,
+				fyear,
+				fPeriod,
+				fDate,
+				fType,
+				fTypeName,				
+				fNumber,
+				fCustomerId,
+				fCustomerName,				
+				fExplanation,
+				fAmount,
+				fCheckType
+			]]>
+			</property>
+			<stmt>
+			<![CDATA[
+					SELECT FID,
+						Fyear,
+						Fperiod,
+						Fdate,
+						FType,
+						case when ftype=5 then '收款单' when ftype=1 then '其他应收单' end as FTypeName,
+						t_RP_Contact.FNumber,
+						FCustomer,
+						t_Organization.FName,
+						FExplanation,
+						case when ftype=5 then FAmount when  ftype=1 then (-1)*FAmount end as FAmount,
+						FCheckType 
+					FROM dbo.t_RP_Contact left join t_Organization on t_RP_Contact.FCustomer=t_Organization.FItemID 
+					WHERE isnull(t_RP_Contact.SyncFlag,0)=1 and ftype in (1,5) and FDate>='2017-03-26'
+			]]>
+			</stmt>
+		</table>
+
+		<table id="K3_ORDER">
+			<c>#同步K3销售出库单#</c>
+			<name>K3_ORDER</name>
+			<key>FInterID</key>
+			<property>
+			<![CDATA[
+				fId,
+				fyear,
+				fPeriod,
+				fDate,
+				fType,
+				fTypeName,
+				fNumber,				
+				fCustomerID,
+				fCustomerName,
+				fExplanation,
+				fAmount,
+				fCheckType
+			]]>
+			</property>
+			<stmt>
+			<![CDATA[
+				 SELECT icstockbill.FInterID as FInterID,
+					    case when day(Fdate)>25 and month(fdate)=12 then year(fdate)+1 else year(fdate) end as FYear ,
+					    case when day(Fdate)>25 and month(fdate)=12 then 1  when day(Fdate)>25 and month(fdate)<>12 then month(fdate)+1 else month(fdate) end as FPeriod,
+					    Fdate,					    
+						FTranType,	
+						'销售出库单' as FTranTypeName,
+						FBillNo,
+						FSupplyID,
+						t_Organization.FName,
+						FExplanation,
+						(-1)*sum(fconsignamount) as famount,
+						case when isnull(FCheckerID,0)<>0 then 1 else 0 end  as FCheckType
+				FROM icstockbill 
+					inner join icstockbillentry on icstockbill.finterid =icstockbillentry.finterid 
+					left join t_Organization on icstockbill.fsupplyid=t_Organization.FItemID
+				WHERE isnull(icstockbill.SyncFlag,0)=1 and ftrantype=21 and FDate>='2017-03-26'
+				and FBillNo not like 'NSMP%' 
+				and FBillNo not like 'pxmp%' and FBillNo not like 'ns%' and FBillNo not like 'spmp%' 
+				GROUP BY   icstockbill.FInterID ,FBillNo,Fdate,FTranType,FSupplyID,
+					t_Organization.FName,FExplanation,FCheckerID
+			]]>
+			</stmt>
+		</table>
+		<!-- 更新销售出库单 -->
+		<proc id="UPDATE_K3_ICSTOCKBILL">
+			<type>update</type>
+			<stmt>
+		<![CDATA[
+			UPDATE icstockbill SET SyncFlag = 1 WHERE ftrantype=21  AND FInterID=?
+		]]>
+			</stmt>
+		</proc>
+		<!-- 更新收款单 -->
+		<proc id="UPDATE_T_RP_CONTACT">
+			<type>update</type>
+			<stmt>
+		<![CDATA[
+			UPDATE t_RP_Contact SET SyncFlag = 1 WHERE FID = ?  AND ftype NOT IN (6,4,2)
+		]]>
+			</stmt>
+		</proc>
+
+		<table id="T_K3ZFCONTACT">
+			<type>query</type>
+			<name>T_K3ZFCONTACT</name>
+			<key>FID</key>
+			<stmt>
+				SELECT FID,SyncFlag FROM T_K3ZFCONTACT WHERE isnull(SyncFlag,0) = 1
+			</stmt>
+		</table>
+
+		<table id="T_K3ZFORDER">
+			<type>query</type>
+			<name>t_K3ZFOrder</name>
+			<key>FInterID</key>
+			<stmt>
+				SELECT FInterID,SyncFlag FROM t_K3ZFOrder WHERE isnull(SyncFlag,0) = 1
+			</stmt>
+		</table>
+	</DDL>
+
+	<DDL id="WMS_BALANCE_SYNC">
+		<proc id="DEL_RECEIVE_ORDER">
+			<type>update</type>
+			<stmt>
+				DELETE FROM base_k3_receive WHERE fId IN (?)
+			</stmt>
+		</proc>
+
+		<proc id="DEL_BK3_ORDER">
+			<type>update</type>
+			<stmt>
+				DELETE FROM BASE_K3_ORDER WHERE fId IN (%s)
+			</stmt>
+		</proc>
+
+		<proc id="INSERT_BK3_ORDER">
+			<type>update</type>
+			<stmt>
+		<![CDATA[
+				INSERT INTO base_k3_order(fId,
+					fYear,
+					fPeriod,
+					fDate,
+					fType,
+					fTypeName,
+					fNumber,				
+					fCustomerID,
+					fCustomerName,
+					fExplanation,
+					fAmount,
+					fCheckType) 
+				VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+		]]>
+			</stmt>
+		</proc>
+
+		<proc id="UPDATE_BK3_ORDER">
+			<type>update</type>
+			<stmt>
+			<![CDATA[
+				UPDATE  base_k3_order 
+				SET fId=?,
+					fYear=?,
+					fPeriod=?,
+					fDate=?,
+					fType=?,
+					fTypeName=?,
+					fNumber=?,					
+					fCustomerID=?,
+					fCustomerName=?,
+					fExplanation=?,
+					fAmount=?,
+					fCheckType=?
+				WHERE fId = ?
+			]]>
+			</stmt>
+		</proc>
+
+		<proc id="INSERT_BK3_RECEIVER">
+			<type>update</type>
+			<stmt>
+			<![CDATA[
+				INSERT INTO base_k3_receive(fId,
+					fYear,
+					fPeriod,
+					fDate,
+					fType,
+					fTypeName,
+					fNumber,				
+					fCustomerID,
+					fCustomerName,
+					fExplanation,
+					fAmount,
+					fCheckType) 
+				VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+			]]>
+			</stmt>
+		</proc>
+
+		<proc id="UPDATE_BK3_RECEIVER">
+			<type>update</type>
+			<stmt>
+				UPDATE base_k3_receive
+				SET fId=?,
+				fYear=?,
+				fPeriod=?,
+				fDate=?,
+				fType=?,
+				fTypeName=?,
+				fNumber=?,
+				fCustomerID=?,
+				fCustomerName=?,
+				fExplanation=?,
+				fAmount=?,
+				fCheckType=?
+				WHERE fId = ?
+			</stmt>
+		</proc>
+	</DDL>
+</Tables>
+	

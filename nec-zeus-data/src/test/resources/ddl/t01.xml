@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metas>
+	<DDL id="WMS_BALANCE_SYNC">
+		<meta id="GET_YEAR_ACCOUNT">
+			<type>query</type>
+			<name>base_k3_account</name>
+			<field>FYear,FPeriod</field>
+			<property>year,period</property>
+			<alias>年, 周期</alias>
+			<key>FYear</key>
+			<stmt>
+			<![CDATA[ 
+				SELECT 	MAX(FYear) as FYear, 
+						MAX(FPeriod) as FPeriod 
+				FROM base_k3_account${varName}
+			]]>
+			</stmt>
+		</meta>
+		
+		<!--每个月的25号的凌晨2.30进行月结；每个月的八号凌晨2.30进行月结  -->
+		<proc id="CUS_BALANCE_END_1">
+			<type>update</type>
+			<stmt>
+			<![CDATA[ 
+				INSERT INTO base_account_temp(FCustomerID,FCustomerName,ReceiveMoney)	
+				SELECT FCustomerID,FCustomerName,sum(FAmount) 
+				FROM base_k3_receive 
+				WHERE FYear=? and FPeriod=? 
+				GROUP BY FCustomerID
+			]]>
+			</stmt>
+		</proc>
+		
+		<proc id="CUS_BALANCE_END_2">
+			<type>update</type>
+			<stmt>
+			<![CDATA[ 
+				INSERT INTO base_account_temp(FCustomerID,FCustomerName,OrderMoney)	
+				SELECT FcustomerID,FCustomerName,sum(FAmount) 
+				FROM base_k3_order 
+				WHERE FYear=? and FPeriod=? 
+				GROUP BY FCustomerID
+			]]>
+			</stmt>
+		</proc>
+		
+		<proc id="CUS_BALANCE_END_3">
+			<type>update</type>
+			<stmt>
+			<![CDATA[ 
+				UPDATE base_k3_account,
+					(SELECT FCustomerID,sum(ReceiveMoney) as ReceiveMoney,sum(OrderMoney) as OrderMoney 
+				FROM base_account_temp GROUP BY FCustomerID ) A 
+					SET base_k3_account.ReceiveMoney=ifnull(A.ReceiveMoney,0),
+					base_k3_account.OutMoney=ifnull(A.OrderMoney,0) ,
+					base_k3_account.EndMoney=ifnull(base_k3_account.BeginMoney,0)+ifnull(A.ReceiveMoney,0)+ifnull(A.OrderMoney,0)  
+				WHERE base_k3_account.FYear=? and base_k3_account.FPeriod=? and base_k3_account.FCustomerID=A.FCustomerID
+			]]>
+			</stmt>
+		</proc>
+
+		<proc id="CUS_BALANCE_END_4">
+			<type>update</type>
+			<stmt>
+			<![CDATA[ 
+				INSERT INTO base_k3_account(FYear,FPeriod,FCustomerID,FCustomerName,BeginMoney,ReceiveMoney,OutMoney,EndMoney)
+				select ?,?,B.FCustomerID,B.FCustomerName,0,ifnull(B.ReceiveMoney,0),ifnull(B.OrderMoney,0),	
+				0+ifnull(B.ReceiveMoney,0)+ifnull(B.OrderMoney,0) as EndMoney 
+				from
+				(select FCustomerID,FCustomerName,sum(ReceiveMoney) as ReceiveMoney,sum(OrderMoney) as OrderMoney 
+				from  base_account_temp group by FCustomerID,FCustomerName) as B
+				left join (select FCustomerID from base_k3_account where base_k3_account.FYear=? and base_k3_account.FPeriod=?) A
+				 on A.FCustomerID=B.FCustomerID  
+				where A.FCustomerID is null 
+			]]>
+			</stmt>
+		</proc>
+		
+		<proc id="CUS_BALANCE_END_5">
+			<type>update</type>
+			<stmt>
+			<![CDATA[ 
+				INSERT INTO base_k3_account(FYear,FPeriod,FCustomerID,FCustomerName,BeginMoney,ReceiveMoney,OutMoney,EndMoney)
+					SELECT ?,?,FCustomerID,FCustomerName,EndMoney,0,0,0  
+				FROM base_k3_account 
+				WHERE FYear=? and FPeriod=?
+			]]>
+			</stmt>
+		</proc>
+		
+		<proc id="CUS_BALANCE_END_6">
+			<type>update</type>
+			<stmt>
+			<![CDATA[ 
+				DELETE FROM base_account_temp
+			]]>
+			</stmt>
+		</proc>
+	</DDL>
+</metas>
+	

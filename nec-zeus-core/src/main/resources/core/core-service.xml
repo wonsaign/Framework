@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<!-- DAO -->
+	<bean id="dictionaryDao" class="com.nec.zeusas.common.dao.impl.DictionaryDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="idGenDao" class="com.nec.zeusas.common.dao.impl.IdGenDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<bean id="opLoggerDao" class="com.nec.zeusas.common.dao.impl.OpLoggerDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- Service -->
+	<bean id="dictionaryService" class="com.nec.zeusas.common.service.impl.DictionaryServiceImpl">
+		<property name="dao" ref="dictionaryDao" />
+	</bean>
+	<bean id="dictManager" class="com.nec.zeusas.common.service.impl.DictManagerImpl">
+		<property name="dictionaryService" ref="dictionaryService" />
+	</bean>
+	<bean id="idGenService" class="com.nec.zeusas.common.service.impl.IdGenServiceImpl">
+		<property name="dao" ref="idGenDao" />
+	</bean>
+	<bean id="opLoggerService"
+		class="com.nec.zeusas.common.service.impl.OpLoggerServiceImpl">
+		<property name="dao" ref="opLoggerDao" />
+	</bean>
+
+</beans>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+	<context:component-scan base-package="com.nec.zeusas" />
+	
+	<!-- Shiro Cache Manager -->
+	<bean id="shiroCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager"
+		scope="singleton">
+	</bean>
+        
+	<bean id="zeusRealm" class="com.nec.zeusas.security.auth.realm.ZeusRealm">
+		<property name="cacheManager" ref="shiroCacheManager" />
+	</bean>
+
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="zeusRealm" />
+	</bean>
+
+	<bean id="anyRolesFilter" class="com.nec.zeusas.security.auth.realm.AnyRolesAuthorizationFilter"/>
+
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+
+		<property name="loginUrl" value="${loginUrl}" />
+		<property name="unauthorizedUrl" value="${unauthorizedUrl}" />
+		<!-- 以下可以从数据为取出 -->
+		<property name="filters">
+			<map>
+				<entry key="anyRoles" value-ref="anyRolesFilter"></entry>
+			</map>
+		</property>
+		<property name="filterChainDefinitions">
+			<value>
+				/login.do=anon
+				/adm/**=authc
+			</value>
+		</property>
+	</bean>
+
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+	<bean id="advisorAutoProxyCreator"
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+		depends-on="lifecycleBeanPostProcessor" />
+	<bean id="authorizationAttributeSourceAdvisor"
+		class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<property name="securityManager" ref="securityManager" />
+	</bean>
+</beans>
